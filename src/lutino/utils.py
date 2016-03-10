@@ -6,6 +6,16 @@ __author__ = 'vahid'
 
 
 def import_python_module_by_filename(name, module_filename):
+    """
+    Import's a file as a python module, with specified name.
+
+    Don't ask about the `name` argument, it's required.
+    
+    :param name: The name of the module to override upon imported filename.
+    :param module_filename: The filename to import as a python module.
+    :return: The newly imported python module.
+    """
+
     sys.path.append(abspath(dirname(module_filename)))
     spec = importlib.util.spec_from_file_location(
         name,

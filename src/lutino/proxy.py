@@ -3,6 +3,33 @@ __author__ = 'vahid'
 
 
 class ObjectProxy(object):
+    """
+    A simple object proxy to let deferred object's initialize later (for example: just after import):
+
+
+    Module: fancy_module
+
+        deferred_object = None  # Will be initialized later.
+
+        def init():
+            global deferred_object
+            deferred_object = AnyValue()
+
+        proxy = ObjectProxy(lambda: deferred_object)
+
+
+    In another module:
+
+        from fancy_module import proxy, init
+
+        def my_very_own_function():
+            try:
+                return proxy.any_attr_or_method()
+            except: ObjectNotInitializedError:
+                init()
+                return my_very_own_function()
+
+    """
 
     def __init__(self, resolver):
         object.__setattr__(self, '_resolver', resolver)
@@ -12,7 +39,7 @@ class ObjectProxy(object):
         o = object.__getattribute__(self, '_resolver')()
         # if still is none, raise the exception
         if o is None:
-            raise ValueError("Object not initialized yet.")
+            raise ObjectNotInitializedError("Object not initialized yet.")
         return o
 
     def __getattr__(self, key):
@@ -20,3 +47,7 @@ class ObjectProxy(object):
 
     def __setattr__(self, key, value):
         setattr(object.__getattribute__(self, 'proxied_object'), key, value)
+
+
+class ObjectNotInitializedError(ValueError):
+    pass
