@@ -11,9 +11,9 @@ class TestCacheItem(unittest.TestCase):
     def setUp(self):
         self.redis = redis.Redis()
         self.sample_data = [
-            {'name': 'vahid'},
-            {'name': 'taghi'},
-            {'name': 'naghi'},
+            {'id': 1, 'name': 'vahid'},
+            {'id': 2, 'name': 'taghi'},
+            {'id': 3, 'name': 'naghi'},
         ]
 
     def test_cache_item(self):
@@ -23,7 +23,7 @@ class TestCacheItem(unittest.TestCase):
 
         cache.set_list(key, self.sample_data)
         result = cache.get_list(key)
-        self.assertEqual(len(self.sample_data), len(result))
+        self.assertEqual(len(self.sample_data), len(list(result)))
 
 
 if __name__ == '__main__':
