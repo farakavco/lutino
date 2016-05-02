@@ -8,3 +8,10 @@ class CacheError(Exception):
 
 class CacheTimeoutError(CacheError):
     pass
+
+
+class KeyInProgressError(CacheError):
+
+    def __init__(self, key):
+        self.key = key
+        super(KeyInProgressError, self).__init__('The given key is under progress: %s' % key)
