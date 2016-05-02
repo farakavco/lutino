@@ -3,9 +3,24 @@ import uuid
 import time
 from datetime import datetime
 from lutino.caching import CacheTimeoutError, serialize, deserialize
+from lutino.caching.exceptions import CacheError
 __author__ = 'vahid'
 
 IN_PROGRESS = '#&PROGRESS&#'
+
+
+_manager = None
+
+
+def init(redis_engine):
+    global _manager
+    _manager = CacheManager(redis_engine)
+
+
+def manager():
+    if _manager is None:
+        raise CacheError('Caching is not initialized.')
+    return _manager
 
 
 class CacheManager(object):
@@ -32,12 +47,12 @@ class CacheManager(object):
         value = self.redis.get(item_key) if item_key else None
 
         if value is None:
-            self.set_item(
+            return self.set_item(
                 key,
                 lambda: recover(*arguments[0], **arguments[1]),
                 ttl=ttl)
-
-        return deserialize(value)
+        else:
+            return deserialize(value)
 
     def set_item(self, key, value, ttl=None):
         old_item_key = self.redis.get(key)
@@ -51,13 +66,16 @@ class CacheManager(object):
         guid = uuid.uuid1()
         item_key = '%s:%s' % (key, guid)
 
+        v = value() if callable(value) else value
+
         self.redis.set(
             item_key,
-            serialize(value() if callable(value) else value),
+            serialize(v),
             ex=ttl)
 
         self.redis.set(key, item_key, ex=ttl)
         self.redis.delete(old_item_key)
+        return v
 
     def get_list(self, key, recover=None, ttl=None):
         pass

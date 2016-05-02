@@ -8,4 +8,4 @@ def serialize(o):
 
 
 def deserialize(s):
-    return ujson.loads(s)
+    return ujson.loads(s.decode())
