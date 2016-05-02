@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+import ujson
 __author__ = 'vahid'
 
 
 def serialize(o):
-    pass
+    return ujson.dumps(o)
 
 
 def deserialize(s):
-    pass
+    return ujson.loads(s)
