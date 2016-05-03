@@ -18,22 +18,21 @@ class TestCacheDecorator(unittest.TestCase):
         self.redis = redis.Redis()
         self.sample_lists = {
             'a': [
-                {'id': 1, 'type': 'a', 'name': 'vahid'},
-                {'id': 2, 'type': 'a', 'name': 'baghali'},
-                {'id': 3, 'type': 'a', 'name': 'taghi'},
-                {'id': 4, 'type': 'a', 'name': 'yadollah'},
+                {'mid': 1, 'type': 'a', 'name': 'vahid'},
+                {'mid': 2, 'type': 'a', 'name': 'baghali'},
+                {'mid': 3, 'type': 'a', 'name': 'taghi'},
+                {'mid': 4, 'type': 'a', 'name': 'yadollah'},
             ],
             'b': [
-                {'id': 11, 'type': 'b', 'name': 'vahid'},
-                {'id': 22, 'type': 'b', 'name': 'baghali'},
-                {'id': 33, 'type': 'b', 'name': 'taghi'},
-                {'id': 44, 'type': 'b', 'name': 'yadollah'},
+                {'mid': 11, 'type': 'b', 'name': 'vahid'},
+                {'mid': 22, 'type': 'b', 'name': 'baghali'},
+                {'mid': 33, 'type': 'b', 'name': 'taghi'},
+                {'mid': 44, 'type': 'b', 'name': 'yadollah'},
             ]
-
         }
         init_cache(self.redis)
 
-    @cache('test', list_=True, )
+    @cache('test', list_=True, key_extractor=lambda x: x['mid'])
     def get_list(self, key=None):
         global call_count
         call_count += 1

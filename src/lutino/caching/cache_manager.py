@@ -30,7 +30,7 @@ class CacheManager(object):
         self.redis = redis_engine
         self.max_wait = max_wait
 
-    def get_item(self, key, recover=None, ttl=None, arguments=([], {})):
+    def get_item(self, key, recover=None, ttl=None, arguments=([], {}), **kwargs):
         item_key = self.redis.get(key)
 
         value = self.redis.get(item_key) if item_key else None
