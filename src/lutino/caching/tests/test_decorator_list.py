@@ -48,7 +48,7 @@ class TestCacheDecorator(unittest.TestCase):
         call_count = 0
         start_time = datetime.now()
         threads = []
-        for i in range(4):
+        for i in range(self.thread_count):
             t = threading.Thread(target=self.list_worker(), daemon=True)
             threads.append(t)
             t.start()

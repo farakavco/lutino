@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import unittest
 import redis
-from lutino.caching import cache, init as init_cache
+from lutino.caching import cache, init as init_cache, manager, create_cache_key
 from datetime import datetime
 import threading
+import time
 __author__ = 'vahid'
 call_count = 0
 
@@ -12,7 +13,7 @@ call_count = 0
 class TestCacheDecorator(unittest.TestCase):
 
     def setUp(self):
-        self.request_count_per_thread = 1000
+        self.request_count_per_thread = 100
         self.thread_count = 4
         self.redis = redis.Redis()
         self.sample_data_items = {
@@ -31,6 +32,12 @@ class TestCacheDecorator(unittest.TestCase):
 
     def item_worker(self):
         for i in range(self.request_count_per_thread):
+            if i == (self.request_count_per_thread // 2):
+                manager().invalidate_item(create_cache_key('test', dict(key='a')))
+                manager().invalidate_item(create_cache_key('test', dict(key='b')))
+                manager().invalidate_item(create_cache_key('test', dict(key='c')))
+                manager().invalidate_item(create_cache_key('test', dict(key='d')))
+
             self.assertEqual(self.get_single_item(key='a'), 1)
             self.assertEqual(self.get_single_item(key='b'), 2)
             self.assertEqual(self.get_single_item(key='c'), 3)
@@ -41,7 +48,7 @@ class TestCacheDecorator(unittest.TestCase):
         call_count = 0
         start_time = datetime.now()
         threads = []
-        for i in range(4):
+        for i in range(self.thread_count):
             t = threading.Thread(target=self.item_worker(), daemon=True)
             threads.append(t)
             t.start()
@@ -50,7 +57,7 @@ class TestCacheDecorator(unittest.TestCase):
             t.join()
 
         seconds = (datetime.now() - start_time).total_seconds()
-        self.assertEqual(call_count, 4)
+        self.assertEqual(call_count, 20)
         print('Total time: %s Avg: %s' % (seconds,  seconds / (self.request_count_per_thread * self.thread_count)))
 
 

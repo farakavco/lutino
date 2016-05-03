@@ -6,7 +6,7 @@ __author__ = 'vahid'
 
 
 # TODO; Concurrency testing
-class TestCacheItem(unittest.TestCase):
+class TestCacheList(unittest.TestCase):
 
     def setUp(self):
         self.redis = redis.Redis()
@@ -16,7 +16,7 @@ class TestCacheItem(unittest.TestCase):
             {'id': 3, 'name': 'naghi'},
         ]
 
-    def test_cache_item(self):
+    def test_cache_list(self):
         cache = CacheManager(self.redis)
 
         key = create_cache_key('test', {'1': 2, '3': 4})
@@ -25,6 +25,10 @@ class TestCacheItem(unittest.TestCase):
         result = cache.get_list(key)
         self.assertEqual(len(self.sample_data), len(list(result)))
 
+        cache.invalidate_list(key)
+
+        result = cache.get_list(key, recover=lambda: self.sample_data)
+        self.assertEqual(len(self.sample_data), len(list(result)))
 
 if __name__ == '__main__':
     unittest.main()
