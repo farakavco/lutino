@@ -3,7 +3,7 @@ import collections
 import uuid
 import time
 from datetime import datetime
-from lutino.caching import CacheTimeoutError, serialize, deserialize
+from lutino.caching import serialize, deserialize
 from lutino.caching.exceptions import CacheError, KeyInProgressError
 __author__ = 'vahid'
 
@@ -138,7 +138,8 @@ class CacheManager(object):
         self.lock(key, no_wait=no_wait)
 
         if key_extractor is None:
-            key_extractor = lambda x: x['id']
+            def key_extractor(x):
+                return x['id']
 
         try:
             value = value() if callable(value) else value
@@ -162,3 +163,12 @@ class CacheManager(object):
             return value
         finally:
             self.unlock(key)
+
+    def invalidate_item(self, key):
+        item_key = self.redis.get(key)
+        if item_key:
+            self.redis.delete(item_key)
+        self.redis.delete(item_key)
+
+    def invalidate_list(self, key):
+        self.redis.delete(key)
