@@ -15,7 +15,7 @@ class TestCacheDecorator(unittest.TestCase):
         self.request_count_per_thread = 1000
         self.thread_count = 4
         self.redis = redis.Redis()
-        self.sample_data = {
+        self.sample_data_items = {
             'a': 1,
             'b': 2,
             'c': 3,
@@ -24,24 +24,25 @@ class TestCacheDecorator(unittest.TestCase):
         init_cache(self.redis)
 
     @cache('test')
-    def get_objects(self, key=None):
+    def get_single_item(self, key=None):
         global call_count
         call_count += 1
-        return self.sample_data[key]
+        return self.sample_data_items[key]
 
-    def worker(self):
+    def item_worker(self):
         for i in range(self.request_count_per_thread):
-            self.assertEqual(self.get_objects(key='a'), 1)
-            self.assertEqual(self.get_objects(key='b'), 2)
-            self.assertEqual(self.get_objects(key='c'), 3)
-            self.assertEqual(self.get_objects(key='d'), 4)
+            self.assertEqual(self.get_single_item(key='a'), 1)
+            self.assertEqual(self.get_single_item(key='b'), 2)
+            self.assertEqual(self.get_single_item(key='c'), 3)
+            self.assertEqual(self.get_single_item(key='d'), 4)
 
-    def test_cache_item(self):
-
+    def test_decorator_cache_item(self):
+        global call_count
+        call_count = 0
         start_time = datetime.now()
         threads = []
         for i in range(4):
-            t = threading.Thread(target=self.worker(), daemon=True)
+            t = threading.Thread(target=self.item_worker(), daemon=True)
             threads.append(t)
             t.start()
 

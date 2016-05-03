@@ -132,8 +132,7 @@ class CacheManager(object):
                 value = self.redis.get(key)
 
         item_keys = deserialize(value)
-        for item_key in item_keys:
-            yield self.get_item(item_key)
+        return [self.get_item(item_key) for item_key in item_keys]
 
     def set_list(self, key, value, ttl=None, key_extractor=None, no_wait=False):
         self.lock(key, no_wait=no_wait)

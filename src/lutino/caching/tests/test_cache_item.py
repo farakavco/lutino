@@ -16,6 +16,7 @@ class TestCacheItem(unittest.TestCase):
 
         d = {'1': 2, '3': 4}
         cache.set_item('key1', d)
+        cache.set_item('key1', d)  # setting twice
         d2 = cache.get_item('key1')
         self.assertDictEqual(d, d2)
 
