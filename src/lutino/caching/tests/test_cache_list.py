@@ -10,6 +10,7 @@ class TestCacheList(unittest.TestCase):
 
     def setUp(self):
         self.redis = redis.Redis()
+        self.redis.flushdb()
         self.sample_data = [
             {'id': 1, 'name': 'vahid'},
             {'id': 2, 'name': 'taghi'},

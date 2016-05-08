@@ -5,6 +5,7 @@ import time
 from datetime import datetime
 from lutino.caching import serialize, deserialize
 from lutino.caching.exceptions import CacheError, KeyInProgressError
+from redlock import RedLock
 __author__ = 'vahid'
 
 IN_PROGRESS = '#&PROGRESS&#'
@@ -26,8 +27,9 @@ def manager():
 
 class CacheManager(object):
 
-    def __init__(self, redis_engine, max_wait=0, reset_on_timeout=True):
+    def __init__(self, redis_engine, max_wait=0):
         self.redis = redis_engine
+        self.redlock = RedLock([redis_engine])
         self.max_wait = max_wait
 
     def get_item(self, key, recover=None, ttl=None, arguments=([], {}), **kwargs):

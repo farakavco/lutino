@@ -10,6 +10,7 @@ class TestCacheItem(unittest.TestCase):
 
     def setUp(self):
         self.redis = redis.Redis()
+        self.redis.flushdb()
 
     def test_cache_item(self):
         cache = CacheManager(self.redis)

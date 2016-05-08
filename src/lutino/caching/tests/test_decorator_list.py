@@ -5,17 +5,21 @@ from lutino.caching import cache, init as init_cache
 from datetime import datetime
 import threading
 __author__ = 'vahid'
+
 call_count = 0
 
 
 # TODO; Concurrency testing
-class TestCacheDecorator(unittest.TestCase):
+class TestCacheDecoratorList(unittest.TestCase):
 
     def setUp(self):
+        global call_count
+        call_count = 0
         self.maxDiff = None
         self.request_count_per_thread = 1000
-        self.thread_count = 4
+        self.thread_count = 6
         self.redis = redis.Redis()
+        self.redis.flushdb()
         self.sample_lists = {
             'a': [
                 {'mid': 1, 'type': 'a', 'name': 'vahid'},
@@ -35,6 +39,7 @@ class TestCacheDecorator(unittest.TestCase):
     @cache('test', list_=True, key_extractor=lambda x: x['mid'])
     def get_list(self, key=None):
         global call_count
+        print("## get_list, call_count: %s" % call_count)
         call_count += 1
         return self.sample_lists[key]
 
@@ -49,7 +54,7 @@ class TestCacheDecorator(unittest.TestCase):
         start_time = datetime.now()
         threads = []
         for i in range(self.thread_count):
-            t = threading.Thread(target=self.list_worker(), daemon=True)
+            t = threading.Thread(target=self.list_worker, daemon=True)
             threads.append(t)
             t.start()
 
