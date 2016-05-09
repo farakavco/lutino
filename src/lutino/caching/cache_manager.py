@@ -32,7 +32,7 @@ class CacheManager(object):
         self.redlock = RedLock([redis_engine])
         self.max_wait = max_wait
 
-    def get_item(self, key, recover=None, ttl=None, arguments=([], {}), **kwargs):
+    def get_item(self, key, recover=None, ttl=None, arguments=([], {})):
         item_key = self.redis.get(key)
 
         value = self.redis.get(item_key) if item_key else None
@@ -43,19 +43,13 @@ class CacheManager(object):
 
         # Trying to recover the value
         if value is None:
-            try:
-                return self.set_item(
-                    key,
-                    lambda: recover(*arguments[0], **arguments[1]),
-                    ttl=ttl,
-                    no_wait=True)
-            except KeyInProgressError:
-                # Nice!, it seems this item is recovering in another pipe,
-                # so just waiting for the item to be loaded
-                self.wait_for_lock(key)
-                value = self.redis.get(item_key)
-
-        return deserialize(value)
+            return self.set_item(
+                key,
+                lambda: recover(*arguments[0], **arguments[1]),
+                ttl=ttl,
+                no_wait=True)
+        else:
+            return deserialize(value)
 
     def set_item(self, key, value, ttl=None, no_wait=False):
         old_item_key = self.redis.get(key)
@@ -81,35 +75,6 @@ class CacheManager(object):
         finally:
             if self.is_locked(key):
                 self.unlock(key)
-
-    @staticmethod
-    def create_lock_key(key):
-        return '%s:lock' % key
-
-    def is_locked(self, key):
-        lock_key = self.create_lock_key(key)
-        return self.redis.get(lock_key) is not None
-
-    def wait_for_lock(self, key):
-        lock_key = self.create_lock_key(key)
-        start_wait_time = datetime.now()
-        while self.redis.get(lock_key) is not None:
-            if 0 < self.max_wait < (datetime.now() - start_wait_time).total_seconds():
-                raise KeyInProgressError(key)
-            time.sleep(.2)
-
-    def lock(self, key, no_wait=False):
-        lock_key = self.create_lock_key(key)
-        start_wait_time = datetime.now()
-        while self.redis.get(lock_key) == 'yes':
-            if no_wait or 0 < self.max_wait < (datetime.now() - start_wait_time).total_seconds():
-                raise KeyInProgressError(key)
-            time.sleep(.2)
-        self.redis.set(lock_key, 'yes', ex=1)
-
-    def unlock(self, key):
-        lock_key = self.create_lock_key(key)
-        self.redis.delete(lock_key)
 
     def get_list(self, key, recover=None, ttl=None, arguments=([], {}), key_extractor=None):
         # First, get the keys list
