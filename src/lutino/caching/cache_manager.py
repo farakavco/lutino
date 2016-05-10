@@ -4,6 +4,7 @@ import uuid
 import time
 from lutino.caching import serialize, deserialize
 from lutino.caching.exceptions import CacheError
+from lutino.caching.common import create_cache_key
 from redlock import Redlock
 import threading
 __author__ = 'vahid'
@@ -127,16 +128,8 @@ class CacheManager(object):
             return [self.get_item(item_key) for item_key in item_keys]
 
     def set_list(self, key, value, ttl=None, key_extractor=None):
+        # locking it to prevent concurrency violation
         lock = self.lock(key)
-
-        # # locking it to prevent concurrency violation
-        # lock = self.lock(key, nowait=True)
-        # if not lock:
-        #     # it seems this item is loading in another thread
-        #     # so, waiting for that:
-        #     # wait & make sure the object is reloaded, the release the lock
-        #     self.unlock(self.lock(key))
-        #     return self.get_list(key)
 
         # check if item loaded
         v = self.get_list(key)
@@ -157,7 +150,7 @@ class CacheManager(object):
                 item_key = key_extractor(item_value)
                 item_keys.append(item_key)
                 self.set_item(
-                    item_key,
+                    create_cache_key(key.split(':')[0], item_key),
                     item_value,
                     ttl=ttl)
 
