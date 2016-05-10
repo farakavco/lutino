@@ -5,6 +5,7 @@ import time
 from lutino.caching import serialize, deserialize
 from lutino.caching.exceptions import CacheError
 from redlock import Redlock
+import threading
 __author__ = 'vahid'
 
 
@@ -22,6 +23,10 @@ def manager():
     return _manager
 
 
+def th():
+    return threading.current_thread().name
+
+
 class CacheManager(object):
 
     def __init__(self, redis_engine, lock_ttl=1000):
@@ -29,22 +34,20 @@ class CacheManager(object):
         self.redlock = Redlock([redis_engine])
         self.lock_ttl = lock_ttl
 
+    @staticmethod
+    def get_lock_key(key):
+        return '%s:lock' % key
+
     def lock(self, key, nowait=False):
-        lock_key = '%s:lock' % key
+        lock_key = self.get_lock_key(key)
         l = False
         while not l:
-            print('Trying to lock:', key)
             l = self.redlock.lock(lock_key, self.lock_ttl)
-
             if l or nowait:
-                if l: print('******* Locking, key:', key)
                 return l
-
-            print('Waiting for key:', key)
             time.sleep(.3)
 
     def unlock(self, lock):
-        print('Unlocking:', lock.resource)
         self.redlock.unlock(lock)
 
     def get_item(self, key, recover=None, ttl=None, arguments=([], {}), **kw):
@@ -75,11 +78,15 @@ class CacheManager(object):
             if not lock:
                 # it seems this item is loading in another thread
                 # so, waiting for that:
-                print('it seems this item is loading in another thread')
-                lock = self.lock(key)
+                # wait & make sure the object is reloaded, the release the lock
+                self.unlock(self.lock(key))
+                return self.get_item(key, None, ttl)
+
+            # check if item loaded
+            v = self.get_item(key, None)
+            if v:
                 self.unlock(lock)
-                print('### wait done')
-                return self.get_item(key, value, ttl)
+                return v
 
         else:
             lock = None
