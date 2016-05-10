@@ -6,9 +6,10 @@ __author__ = 'vahid'
 
 def create_cache_key(namespace, k):
     if isinstance(k, dict):
-        hashable = urlencode(k)
+        subkey = urlencode(k)
     elif isinstance(k, collections.Iterable):
-        hashable = tuple([quote(i) for i in k])
+        subkey = ','.join([quote(i) for i in k])
     else:
-        hashable = k
-    return '%s:%s' % (namespace, hash(hashable))
+        subkey = k
+    key = '%s:%s' % (namespace, subkey)
+    return key
