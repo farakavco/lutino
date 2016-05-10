@@ -15,8 +15,8 @@ def th():
 class TestCacheDecoratorItem(unittest.TestCase):
 
     def setUp(self):
-        self.request_count_per_thread = 100
-        self.thread_count = 8
+        self.request_count_per_thread = 20
+        self.thread_count = 3
         self.redis = redis.Redis()
         self.redis.flushdb()
         self.sample_data_items = {

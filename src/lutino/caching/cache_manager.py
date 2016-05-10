@@ -80,7 +80,7 @@ class CacheManager(object):
                 # so, waiting for that:
                 # wait & make sure the object is reloaded, the release the lock
                 self.unlock(self.lock(key))
-                return self.get_item(key, None, ttl)
+                return self.get_item(key)
 
             # check if item loaded
             v = self.get_item(key, None)
@@ -128,6 +128,21 @@ class CacheManager(object):
 
     def set_list(self, key, value, ttl=None, key_extractor=None):
         lock = self.lock(key)
+
+        # # locking it to prevent concurrency violation
+        # lock = self.lock(key, nowait=True)
+        # if not lock:
+        #     # it seems this item is loading in another thread
+        #     # so, waiting for that:
+        #     # wait & make sure the object is reloaded, the release the lock
+        #     self.unlock(self.lock(key))
+        #     return self.get_list(key)
+
+        # check if item loaded
+        v = self.get_list(key)
+        if v:
+            self.unlock(lock)
+            return v
 
         if key_extractor is None:
             def key_extractor(x):
