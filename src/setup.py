@@ -15,7 +15,6 @@ with open(join(dirname(__file__), 'lutino', '__init__.py')) as v_file:
 dependencies = [
     'redis',
     'ujson',
-    'redlock',
     'redlock-py'
 ]
 
