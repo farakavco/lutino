@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 import unittest
-import redis
 from lutino.caching import CacheManager
+from lutino.caching.tests.base import CachingTestCase
 __author__ = 'vahid'
 
 
 # TODO; Concurrency testing
-class TestCacheItem(unittest.TestCase):
-
-    def setUp(self):
-        self.redis = redis.Redis()
-        self.redis.flushdb()
+class TestCacheItem(CachingTestCase):
 
     def test_cache_item(self):
         cache = CacheManager(self.redis)

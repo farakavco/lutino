@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 import unittest
-import redis
 from lutino.caching import CacheManager, create_cache_key
+from lutino.caching.tests.base import CachingTestCase
 __author__ = 'vahid'
 
 
-# TODO; Concurrency testing
-class TestCacheList(unittest.TestCase):
+class TestCacheList(CachingTestCase):
 
-    def setUp(self):
-        self.redis = redis.Redis()
-        self.redis.flushdb()
-        self.sample_data = [
+    @classmethod
+    def setUpClass(cls):
+        cls.sample_data = [
             {'id': 1, 'name': 'vahid'},
             {'id': 2, 'name': 'taghi'},
             {'id': 3, 'name': 'naghi'},
@@ -19,7 +17,9 @@ class TestCacheList(unittest.TestCase):
 
     def test_cache_list(self):
         cache = CacheManager(self.redis)
-        key_extractor = lambda o: dict(id=o['id'])
+
+        def key_extractor(o):
+            return dict(id=o['id'])
 
         list_key = create_cache_key('test', {'1': 2, '3': 4})
 
@@ -37,6 +37,3 @@ class TestCacheList(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-
-

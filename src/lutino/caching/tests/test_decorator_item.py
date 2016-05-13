@@ -1,37 +1,34 @@
 # -*- coding: utf-8 -*-
 import unittest
-import redis
-from lutino.caching import cache, init as init_cache, manager, create_cache_key
+from lutino.caching import cache, manager, create_cache_key
+from lutino.caching.tests.base import CachingTestCase
 from datetime import datetime
 import threading
 __author__ = 'vahid'
-call_count = 0
 
 
 def th():
     return threading.current_thread().name
 
 
-class TestCacheDecoratorItem(unittest.TestCase):
+class TestCacheDecoratorItem(CachingTestCase):
 
-    def setUp(self):
-        self.request_count_per_thread = 20
-        self.thread_count = 3
-        self.redis = redis.Redis()
-        self.redis.flushdb()
-        self.sample_data_items = {
+    @classmethod
+    def setUpClass(cls):
+        cls.request_count_per_thread = 20
+        cls.thread_count = 3
+        cls.invalidated = False
+        cls.call_count = 0
+        cls.sample_data_items = {
             'a': 1,
             'b': 2,
             'c': 3,
             'd': 4,
         }
-        init_cache(self.redis)
-        self.invalidated = False
 
     @cache('test')
     def get_single_item(self, key=None):
-        global call_count
-        call_count += 1
+        self.call_count += 1
         print('%s: key=%s Calling backend' % (th(), key))
         return self.sample_data_items[key]
 
@@ -50,8 +47,7 @@ class TestCacheDecoratorItem(unittest.TestCase):
             self.assertIsNotNone(self.get_single_item(key='d'))
 
     def test_decorator_cache_item(self):
-        global call_count
-        call_count = 0
+        self.call_count = 0
         start_time = datetime.now()
         threads = []
         for i in range(self.thread_count):
@@ -63,12 +59,9 @@ class TestCacheDecoratorItem(unittest.TestCase):
             t.join()
 
         seconds = (datetime.now() - start_time).total_seconds()
-        self.assertTrue(4 <= call_count <= 8)
+        self.assertTrue(4 <= self.call_count <= 8)
         print('Total time: %s Avg: %s' % (seconds,  seconds / (self.request_count_per_thread * self.thread_count)))
 
 
 if __name__ == '__main__':
     unittest.main()
-
-
-

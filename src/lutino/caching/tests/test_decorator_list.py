@@ -1,30 +1,25 @@
 # -*- coding: utf-8 -*-
 import unittest
-import redis
-from lutino.caching import cache, init as init_cache, manager, create_cache_key
+from lutino.caching import cache, manager, create_cache_key
+from lutino.caching.tests.base import CachingTestCase
 from datetime import datetime
 import threading
 __author__ = 'vahid'
-
-call_count = 0
 
 
 def th():
     return threading.current_thread().name
 
 
-class TestCacheDecoratorList(unittest.TestCase):
+class TestCacheDecoratorList(CachingTestCase):
 
-    def setUp(self):
-        global call_count
-        call_count = 0
-        self.maxDiff = None
-        self.request_count_per_thread = 100
-        self.thread_count = 4
-        self.redis = redis.Redis()
-        self.redis.flushdb()
-        self.invalidated = False
-        self.sample_lists = {
+    @classmethod
+    def setUpClass(cls):
+        cls.request_count_per_thread = 100
+        cls.thread_count = 4
+        cls.invalidated = False
+        cls.call_count = 0
+        cls.sample_lists = {
             'a': [
                 {'id': 1, 'type': 'a', 'name': 'vahid'},
                 {'id': 2, 'type': 'a', 'name': 'baghali'},
@@ -38,13 +33,11 @@ class TestCacheDecoratorList(unittest.TestCase):
                 {'id': 44, 'type': 'b', 'name': 'yadollah'},
             ]
         }
-        init_cache(self.redis)
 
     @cache('test', list_=True, key_extractor=lambda x: dict(id=x['id']))
     def get_list(self, key=None):
-        global call_count
-        call_count += 1
-        print("## get_list, call_count: %s" % call_count)
+        self.call_count += 1
+        print("## get_list, call_count: %s" % self.call_count)
         return self.sample_lists[key]
 
     def list_worker(self):
@@ -59,8 +52,6 @@ class TestCacheDecoratorList(unittest.TestCase):
             self.assertListEqual(self.get_list(key='b'), self.sample_lists['b'])
 
     def test_decorator_cache_list(self):
-        global call_count
-        call_count = 0
         start_time = datetime.now()
         threads = []
         for i in range(self.thread_count):
@@ -72,11 +63,8 @@ class TestCacheDecoratorList(unittest.TestCase):
             t.join()
 
         seconds = (datetime.now() - start_time).total_seconds()
-        self.assertEqual(call_count, 4)
+        self.assertEqual(self.call_count, 4)
         print('Total time: %s Avg: %s' % (seconds, seconds / (self.request_count_per_thread * self.thread_count)))
 
 if __name__ == '__main__':
     unittest.main()
-
-
-
