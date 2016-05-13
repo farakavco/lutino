@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 import redis
-from lutino.caching import init as init_cache
+from lutino.caching import CacheManager
 __author__ = 'vahid'
 
 
@@ -16,5 +16,5 @@ class CachingTestCase(RedisTestCase):
 
     def setUp(self):
         super(CachingTestCase, self).setUp()
-        init_cache(self.redis)
+        self.cache_manager = CacheManager(self.redis)
 

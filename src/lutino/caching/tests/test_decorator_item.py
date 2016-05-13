@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from lutino.caching import cache, manager, create_cache_key
+from lutino.caching import create_cache_key
 from lutino.caching.tests.base import CachingTestCase
 from datetime import datetime
 import threading
@@ -26,25 +26,26 @@ class TestCacheDecoratorItem(CachingTestCase):
             'd': 4,
         }
 
-    @cache('test')
-    def get_single_item(self, key=None):
-        self.call_count += 1
-        print('%s: key=%s Calling backend' % (th(), key))
-        return self.sample_data_items[key]
-
     def item_worker(self):
+
+        @self.cache_manager.decorate('test')
+        def get_single_item(key=None):
+            self.call_count += 1
+            print('%s: key=%s Calling backend' % (th(), key))
+            return self.sample_data_items[key]
+
         for i in range(self.request_count_per_thread):
             if not self.invalidated and i == (self.request_count_per_thread // 2) and th() == 'th 01':
                 self.invalidated = True
-                manager().set_item(create_cache_key('test', dict(key='a')), 11)
-                manager().set_item(create_cache_key('test', dict(key='b')), 22)
-                manager().set_item(create_cache_key('test', dict(key='c')), 33)
-                manager().set_item(create_cache_key('test', dict(key='d')), 44)
+                self.cache_manager.set_item(create_cache_key('test', dict(key='a')), 11)
+                self.cache_manager.set_item(create_cache_key('test', dict(key='b')), 22)
+                self.cache_manager.set_item(create_cache_key('test', dict(key='c')), 33)
+                self.cache_manager.set_item(create_cache_key('test', dict(key='d')), 44)
 
-            self.assertIsNotNone(self.get_single_item(key='a'))
-            self.assertIsNotNone(self.get_single_item(key='b'))
-            self.assertIsNotNone(self.get_single_item(key='c'))
-            self.assertIsNotNone(self.get_single_item(key='d'))
+            self.assertIsNotNone(get_single_item(key='a'))
+            self.assertIsNotNone(get_single_item(key='b'))
+            self.assertIsNotNone(get_single_item(key='c'))
+            self.assertIsNotNone(get_single_item(key='d'))
 
     def test_decorator_cache_item(self):
         self.call_count = 0

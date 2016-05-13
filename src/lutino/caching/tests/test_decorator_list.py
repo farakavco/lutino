@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from lutino.caching import cache, manager, create_cache_key
+from lutino.caching import create_cache_key
 from lutino.caching.tests.base import CachingTestCase
 from datetime import datetime
 import threading
@@ -34,22 +34,23 @@ class TestCacheDecoratorList(CachingTestCase):
             ]
         }
 
-    @cache('test', list_=True, key_extractor=lambda x: dict(id=x['id']))
-    def get_list(self, key=None):
-        self.call_count += 1
-        print("## get_list, call_count: %s" % self.call_count)
-        return self.sample_lists[key]
-
     def list_worker(self):
+
+        @self.cache_manager.decorate('test', list_=True, key_extractor=lambda x: dict(id=x['id']))
+        def get_list(key=None):
+            self.call_count += 1
+            print("## get_list, call_count: %s" % self.call_count)
+            return self.sample_lists[key]
+
         for i in range(self.request_count_per_thread):
             if not self.invalidated and i == (self.request_count_per_thread // 2) and th() == 'th 01':
                 self.invalidated = True
                 print('Invalidating')
-                manager().invalidate_list(create_cache_key('test', dict(key='a')))
-                manager().invalidate_list(create_cache_key('test', dict(key='b')))
+                self.cache_manager.invalidate_list(create_cache_key('test', dict(key='a')))
+                self.cache_manager.invalidate_list(create_cache_key('test', dict(key='b')))
 
-            self.assertListEqual(self.get_list(key='a'), self.sample_lists['a'])
-            self.assertListEqual(self.get_list(key='b'), self.sample_lists['b'])
+            self.assertListEqual(get_list(key='a'), self.sample_lists['a'])
+            self.assertListEqual(get_list(key='b'), self.sample_lists['b'])
 
     def test_decorator_cache_list(self):
         start_time = datetime.now()

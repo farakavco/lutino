@@ -3,29 +3,9 @@ import collections
 import uuid
 import time
 from lutino.caching import serialize, deserialize
-from lutino.caching.exceptions import CacheError
 from lutino.caching.common import create_cache_key
 from redlock import Redlock
-import threading
 __author__ = 'vahid'
-
-
-_manager = None
-
-
-def init(redis_engine):
-    global _manager
-    _manager = CacheManager(redis_engine)
-
-
-def manager():
-    if _manager is None:
-        raise CacheError('Caching is not initialized.')
-    return _manager
-
-
-def th():
-    return threading.current_thread().name
 
 
 class CacheManager(object):
@@ -172,3 +152,25 @@ class CacheManager(object):
 
     def invalidate_list(self, key):
         self.redis.delete(key)
+
+    def decorate(self, namespace, list_=False, ttl=None, key_extractor=None):
+
+        def decorator(func):
+
+            def wrapper(*args, **kwargs):
+                cache_key = create_cache_key(namespace, kwargs)
+                cache_params = dict(
+                    ttl=ttl,
+                    recover=func,
+                    arguments=(args, kwargs),
+                )
+                if list_:
+                    cache_method = self.get_list
+                    cache_params['key_extractor'] = key_extractor
+                else:
+                    cache_method = self.get_item
+                return cache_method(cache_key, **cache_params)
+
+            return wrapper
+
+        return decorator
