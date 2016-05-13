@@ -19,17 +19,21 @@ class TestCacheList(unittest.TestCase):
 
     def test_cache_list(self):
         cache = CacheManager(self.redis)
+        key_extractor = lambda o: dict(id=o['id'])
 
-        key = create_cache_key('test', {'1': 2, '3': 4})
+        list_key = create_cache_key('test', {'1': 2, '3': 4})
 
-        cache.set_list(key, self.sample_data)
-        result = cache.get_list(key)
+        cache.set_list(list_key, self.sample_data, key_extractor=key_extractor)
+        result = cache.get_list(list_key)
         self.assertEqual(len(self.sample_data), len(list(result)))
 
-        cache.invalidate_list(key)
+        cache.invalidate_list(list_key)
 
-        result = cache.get_list(key, recover=lambda: self.sample_data)
+        result = cache.get_list(list_key, recover=lambda: self.sample_data, key_extractor=key_extractor)
         self.assertEqual(len(self.sample_data), len(list(result)))
+        self.assertEqual(cache.get_item('test:id=1'), self.sample_data[0])
+        self.assertEqual(cache.get_item('test:id=2'), self.sample_data[1])
+        self.assertEqual(cache.get_item('test:id=3'), self.sample_data[2])
 
 if __name__ == '__main__':
     unittest.main()

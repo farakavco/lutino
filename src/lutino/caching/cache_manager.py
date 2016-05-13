@@ -147,10 +147,10 @@ class CacheManager(object):
             assert isinstance(value, collections.Iterable), "Value must be iterable"
 
             for item_value in value:
-                item_key = key_extractor(item_value)
+                item_key = create_cache_key(key.split(':')[0], key_extractor(item_value))
                 item_keys.append(item_key)
                 self.set_item(
-                    create_cache_key(key.split(':')[0], item_key),
+                    item_key,
                     item_value,
                     ttl=ttl)
 
