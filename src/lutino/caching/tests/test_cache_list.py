@@ -22,13 +22,22 @@ class TestCacheList(CachingTestCase):
 
         list_key = create_cache_key('test', {'1': 2, '3': 4})
 
-        self.cache_manager.set_list(list_key, self.sample_data, key_extractor=key_extractor)
-        result = self.cache_manager.get_list(list_key)
+        self.cache_manager.set_list(
+            list_key,
+            (len(self.sample_data), self.sample_data),
+            key_extractor=key_extractor)
+
+        results_count, result = self.cache_manager.get_list(list_key)
+        self.assertEqual(len(self.sample_data), results_count)
         self.assertEqual(len(self.sample_data), len(list(result)))
 
         self.cache_manager.invalidate_list(list_key)
 
-        result = self.cache_manager.get_list(list_key, recover=lambda: self.sample_data, key_extractor=key_extractor)
+        results_count, result = self.cache_manager.get_list(
+            list_key,
+            recover=lambda: (len(self.sample_data), self.sample_data),
+            key_extractor=key_extractor)
+        self.assertEqual(len(self.sample_data), results_count)
         self.assertEqual(len(self.sample_data), len(list(result)))
         self.assertEqual(self.cache_manager.get_item('test:id=1'), self.sample_data[0])
         self.assertEqual(self.cache_manager.get_item('test:id=2'), self.sample_data[1])

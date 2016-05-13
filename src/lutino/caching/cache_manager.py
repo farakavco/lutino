@@ -94,7 +94,7 @@ class CacheManager(object):
         # First, get the keys list
         value = self.redis.get(key)
         if value is None and recover is None:
-            return None
+            return None, None
 
         # Trying to recover the value
         if value is None:
@@ -104,8 +104,8 @@ class CacheManager(object):
                     ttl=ttl,
                     key_extractor=key_extractor)
         else:
-            item_keys = deserialize(value)
-            return [self.get_item(item_key) for item_key in item_keys]
+            metadata, item_keys = deserialize(value)
+            return metadata, [self.get_item(item_key) for item_key in item_keys]
 
     def set_list(self, key, value, ttl=None, key_extractor=None):
         # locking it to prevent concurrency violation
@@ -113,16 +113,16 @@ class CacheManager(object):
 
         # check if item loaded
         v = self.get_list(key)
-        if v:
+        if v[1]:
             self.unlock(lock)
-            return v
+            return v  # packed: (value_metadata, value)
 
         if key_extractor is None:
             def key_extractor(x):
                 return x['id']
 
         try:
-            value = value() if callable(value) else value
+            value_metadata, value = value() if callable(value) else value
             item_keys = []
             assert isinstance(value, collections.Iterable), "Value must be iterable"
 
@@ -136,10 +136,10 @@ class CacheManager(object):
 
             self.redis.set(
                 key,
-                serialize(item_keys),
+                serialize((value_metadata, item_keys)),
                 ex=ttl)
 
-            return value
+            return value_metadata, value
         finally:
             if lock:
                 self.unlock(lock)
