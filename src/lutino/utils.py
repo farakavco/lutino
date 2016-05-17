@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import importlib
 import importlib.util
 import sys
 import warnings
@@ -24,6 +25,21 @@ def import_python_module_by_filename(name, module_filename):
     imported_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(imported_module)
     return imported_module
+
+
+def construct_class_by_name(name, *args, **kwargs):
+    """
+    Construct a class by module path name using *args and **kwargs
+
+    Don't ask about the `name` argument, it's required.
+
+    :param name: class name
+    :return: The newly imported python module.
+    """
+    parts = name.split('.')
+    module_name, class_name = '.'.join(parts[:-1]), parts[-1]
+    module = importlib.import_module(module_name)
+    return getattr(module, class_name)(*args, **kwargs)
 
 
 def deprecated(func):
