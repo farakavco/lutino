@@ -1,4 +1,14 @@
 class SingletonMeta(type):
+    """
+    Usage:
+
+        class MyClass(A, B, metaclass=SingletonMeta):
+            pass
+
+        assert MyClass() is MyClass()
+
+    """
+
     _singleton_instance = None
 
     # noinspection PyInitNewSignature
