@@ -7,6 +7,9 @@ class SingletonMeta(type):
 
         assert MyClass() is MyClass()
 
+    Note: the __init__ method should be called on each MyClass call, but the `self` argument is guaranteed
+    to be always the singleton instance.
+
     """
 
     _singleton_instance = None
@@ -23,26 +26,3 @@ class SingletonMeta(type):
 
         class_.__new__ = new
         return class_
-
-
-if __name__ == '__main__':
-
-    class A(object):
-        pass
-
-
-    class B(object):
-        pass
-
-
-    class MyClass(A, B, metaclass=SingletonMeta):
-        pass
-
-
-    c1 = MyClass()
-    c2 = MyClass()
-    c3 = MyClass()
-    c4 = MyClass()
-    assert c1 is c2
-    assert c1 is c3
-    assert c1 is c4
