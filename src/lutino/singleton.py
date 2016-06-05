@@ -12,17 +12,21 @@ class SingletonMeta(type):
 
     """
 
-    _singleton_instance = None
+    _singleton_instances = dict()
 
     # noinspection PyInitNewSignature
     def __new__(mcs, name, bases, namespace, **kwargs):
-        class_ = type.__new__(mcs, name, bases, namespace, **kwargs)
+        meta_class = type.__new__(mcs, name, bases, namespace, **kwargs)
 
         def new(cls, *args, **kw):
-            if mcs._singleton_instance is None:
-                # mcs._singleton_instance = bases[0].__new__(cls, *args, **kwargs)
-                mcs._singleton_instance = super(class_, cls).__new__(cls, *args, **kw)
-            return mcs._singleton_instance
+            if cls in mcs._singleton_instances:
+                return mcs._singleton_instances[cls]
 
-        class_.__new__ = new
-        return class_
+            instance = super(meta_class, cls).__new__(cls, *args, **kw)
+            if cls not in mcs._singleton_instances:
+                mcs._singleton_instances[cls] = instance
+
+            return mcs._singleton_instances[cls]
+
+        meta_class.__new__ = new
+        return meta_class
