@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from hashids import Hashids
+
 __author__ = 'vahid'
 
 
@@ -22,6 +24,22 @@ class XorKeySerializer(BaseKeySerializer):
 
     def loads(self, v):
         return int(v, 16) ^ self.secret
+
+
+class HashIdSerializer(BaseKeySerializer):
+    def __init__(self, salt):
+        self.hash_maker = Hashids(salt=salt)
+
+    def dumps(self, v):
+        assert isinstance(v, int)
+        return self.hash_maker.encode(v)
+
+    def loads(self, v):
+        assert isinstance(v, str)
+        result = self.hash_maker.decode(v)
+        if not result:
+            raise ValueError('invalid id')
+        return result[0]
 
 
 if __name__ == '__main__':
