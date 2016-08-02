@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import unittest
+
 from lutino.caching import create_cache_key
 from lutino.caching.tests.base import CachingTestCase
-__author__ = 'vahid'
 
 
 class TestCacheList(CachingTestCase):
@@ -42,6 +41,7 @@ class TestCacheList(CachingTestCase):
         self.assertEqual(self.cache_manager.get_item('test:id=1'), self.sample_data[0])
         self.assertEqual(self.cache_manager.get_item('test:id=2'), self.sample_data[1])
         self.assertEqual(self.cache_manager.get_item('test:id=3'), self.sample_data[2])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import unittest
+
 from lutino.caching.tests.base import CachingTestCase
-__author__ = 'vahid'
 
 
 # TODO; Concurrency testing
@@ -20,8 +19,6 @@ class TestCacheItem(CachingTestCase):
         d2 = self.cache_manager.get_item('key1', recover=lambda: d)
         self.assertDictEqual(d, d2)
 
+
 if __name__ == '__main__':
     unittest.main()
-
-
-

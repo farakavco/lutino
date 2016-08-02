@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import unittest
+import threading
+from datetime import datetime
+
 from lutino.caching import create_cache_key
 from lutino.caching.tests.base import CachingTestCase
-from datetime import datetime
-import threading
-__author__ = 'vahid'
 
 
 def th():
@@ -51,6 +50,7 @@ class TestCacheDecoratorItem(CachingTestCase):
         self.call_count = 0
         start_time = datetime.now()
         threads = []
+
         for i in range(self.thread_count):
             t = threading.Thread(target=self.item_worker, daemon=True, name='th %02d' % (i+1))
             threads.append(t)

@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import unittest
+import threading
+from datetime import datetime
+
 from lutino.caching import create_cache_key
 from lutino.caching.tests.base import CachingTestCase
-from datetime import datetime
-import threading
-__author__ = 'vahid'
 
 
 def th():
@@ -55,6 +54,7 @@ class TestCacheDecoratorList(CachingTestCase):
     def test_decorator_cache_list(self):
         start_time = datetime.now()
         threads = []
+
         for i in range(self.thread_count):
             t = threading.Thread(target=self.list_worker, daemon=True, name='th %02d' % (i+1))
             threads.append(t)
@@ -66,6 +66,7 @@ class TestCacheDecoratorList(CachingTestCase):
         seconds = (datetime.now() - start_time).total_seconds()
         self.assertEqual(self.call_count, 4)
         print('Total time: %s Avg: %s' % (seconds, seconds / (self.request_count_per_thread * self.thread_count)))
+
 
 if __name__ == '__main__':
     unittest.main()
