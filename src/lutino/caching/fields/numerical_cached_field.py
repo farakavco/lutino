@@ -12,22 +12,27 @@ class NumericalCachedField(CachedField):
     def key(self):
         return '%s_%s_visits' % (self.model_name, self.model_identity)
 
-    def get(self, key, ttl):
-        value = self.redis.get(key)
+    def get(self, ttl=None):
+        value = self.redis.get(self.key)
 
         if value is None:
-            return self.set(key, ttl)
+            return self.set(self.key, ttl)
         else:
-            return value
+            return int(value)
 
-    def set(self, key, ttl):
-        value = self.fetch()
-        self.redis.set(key, value, ex=ttl)
+    def set(self, value=None, ttl=None):
+        if value is None:
+            value = self.fetch()
+
+            if value is None:
+                raise ValueError
+
+        self.redis.set(self.key, value, ex=ttl)
         return value
 
-    def increment(self, key):
-        value = self.redis.incr(key)
-        return value
+    def increment(self):
+        value = self.redis.incr(self.key)
+        return int(value)
 
     def fetch(self):
         raise NotImplementedError()
