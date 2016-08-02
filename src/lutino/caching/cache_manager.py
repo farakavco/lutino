@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import collections
 import uuid
 import time
+from redlock import Redlock
+
 from lutino.caching import serialize, deserialize
 from lutino.caching.common import create_cache_key
-from redlock import Redlock
-__author__ = 'vahid'
 
 
 class CacheManager(object):
@@ -22,6 +21,7 @@ class CacheManager(object):
     def lock(self, key, nowait=False):
         lock_key = self.get_lock_key(key)
         l = False
+
         while not l:
             l = self.redlock.lock(lock_key, self.lock_ttl)
             if l or nowait:
@@ -68,7 +68,6 @@ class CacheManager(object):
             if v:
                 self.unlock(lock)
                 return v
-
         else:
             lock = None
 
@@ -77,14 +76,13 @@ class CacheManager(object):
             item_key = '%s:%s' % (key, guid)
             value = value() if callable(value) else value
 
-            self.redis.set(
-                item_key,
-                serialize(value),
-                ex=ttl)
+            self.redis.set(item_key, serialize(value), ex=ttl)
 
             self.redis.set(key, item_key, ex=ttl)
+
             if old_item_key:
                 self.redis.delete(old_item_key)
+
             return value
         finally:
             if lock:
@@ -93,6 +91,7 @@ class CacheManager(object):
     def get_list(self, key, recover=None, ttl=None, arguments=([], {}), key_extractor=None):
         # First, get the keys list
         value = self.redis.get(key)
+
         if value is None and recover is None:
             return None, None
 
@@ -147,6 +146,7 @@ class CacheManager(object):
     def invalidate_item(self, key):
         item_key = self.redis.get(key)
         self.redis.delete(key)
+
         if item_key:
             self.redis.delete(item_key)
 
@@ -164,11 +164,13 @@ class CacheManager(object):
                     recover=func,
                     arguments=(args, kwargs),
                 )
+
                 if list_:
                     cache_method = self.get_list
                     cache_params['key_extractor'] = key_extractor
                 else:
                     cache_method = self.get_item
+
                 return cache_method(cache_key, **cache_params)
 
             return wrapper

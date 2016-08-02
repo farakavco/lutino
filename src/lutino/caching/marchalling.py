@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 import ujson
-__author__ = 'vahid'
 
 
 def serialize(o):

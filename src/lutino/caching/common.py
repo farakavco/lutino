@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 import collections
 from urllib.parse import urlencode, quote
-__author__ = 'vahid'
 
 
 def create_cache_key(namespace, k):
