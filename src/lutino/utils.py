@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 import importlib
 import importlib.util
 import sys
 import warnings
 from os.path import dirname, abspath
-__author__ = 'vahid'
 
 
 def import_python_module_by_filename(name, module_filename):
@@ -63,5 +61,3 @@ def deprecated(func):
     new_func.__doc__ = func.__doc__
     new_func.__dict__.update(func.__dict__)
     return new_func
-
-

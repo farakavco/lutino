@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-__author__ = 'vahid'
+
 _character_map = {
     'ي': 'ی',
     'ك': 'ک',

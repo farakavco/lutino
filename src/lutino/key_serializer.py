@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
 from hashids import Hashids
-
-__author__ = 'vahid'
 
 
 class BaseKeySerializer(object):
@@ -37,8 +34,10 @@ class HashIdSerializer(BaseKeySerializer):
     def loads(self, v):
         assert isinstance(v, str)
         result = self.hash_maker.decode(v)
+
         if not result:
             raise ValueError('invalid id')
+
         return result[0]
 
 
@@ -47,6 +46,7 @@ if __name__ == '__main__':
 
     for i in range(2 ** 16):
         d = s.dumps(i)
+
         if i % 1000000:
             print(i, d)
         assert i == s.loads(d)

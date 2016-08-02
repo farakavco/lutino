@@ -1,3 +1,5 @@
+
+
 class SingletonMeta(type):
     """
     Usage:
@@ -23,6 +25,7 @@ class SingletonMeta(type):
                 return mcs._singleton_instances[cls]
 
             instance = super(meta_class, cls).__new__(cls, *args, **kw)
+
             if cls not in mcs._singleton_instances:
                 mcs._singleton_instances[cls] = instance
 

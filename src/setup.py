@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 """
 # install it by: pip install --process-dependency-links --trusted-host guthub.com -e .
 """
 
-from os.path import join, dirname
 import re
+from os.path import join, dirname
 from setuptools import setup, find_packages
-__author__ = 'vahid'
 
 # reading package version (same way the sqlalchemy does)
 with open(join(dirname(__file__), 'lutino', '__init__.py')) as v_file:
