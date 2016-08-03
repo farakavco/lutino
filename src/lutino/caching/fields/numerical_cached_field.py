@@ -12,7 +12,7 @@ class NumericalCachedField(CachedField):
     def key(self):
         return '%s_%s_visits' % (self.model_name, self.model_identity)
 
-    def get(self, ttl=None):
+    def get(self, ttl=None, arguments=([], {})):
         value = self.redis.get(self.key)
 
         if value is None:
@@ -25,7 +25,7 @@ class NumericalCachedField(CachedField):
             value = self.fetch()
 
             if value is None:
-                raise ValueError
+                raise ValueError()
 
         self.redis.set(self.key, value, ex=ttl)
         return value
@@ -40,6 +40,18 @@ class NumericalCachedField(CachedField):
 
     def fetch(self):
         raise NotImplementedError()
+
+    @classmethod
+    def cached_field(cls, redis, model_name, ttl=None):
+        def decorator(func):
+
+            def wrapper(*args, **kwargs):
+                obj = cls(redis, model_name, func())
+                return obj.get(ttl=ttl, arguments=(args, kwargs))
+
+            return wrapper
+
+        return decorator
 
 
 # noinspection PyAbstractClass
