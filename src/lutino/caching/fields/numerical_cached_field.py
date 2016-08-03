@@ -3,14 +3,15 @@ from lutino.caching.fields.cached_field import CachedField
 
 class NumericalCachedField(CachedField):
 
-    def __init__(self, redis_engine, model_name, model_identity):
+    def __init__(self, redis_engine, model_name, model_identity, field_name):
         self.redis = redis_engine
         self.model_name = model_name
         self.model_identity = model_identity
+        self.field_name = field_name
 
     @property
     def key(self):
-        return '%s_%s_visits' % (self.model_name, self.model_identity)
+        return '%s_%s_%s' % (self.model_name, self.model_identity, self.field_name)
 
     def get(self, ttl=None, arguments=([], {})):
         value = self.redis.get(self.key)
@@ -57,4 +58,4 @@ class NumericalCachedField(CachedField):
 # noinspection PyAbstractClass
 class VideoVisitCachedField(NumericalCachedField):
     def __init__(self, redis_engine, model_identity):
-        super().__init__(redis_engine, 'videos', model_identity)
+        super().__init__(redis_engine, 'videos', model_identity, 'visits')
