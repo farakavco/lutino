@@ -34,11 +34,15 @@ class NumericalCachedField(CachedField):
         value = self.redis.incr(self.key)
         return int(value)
 
+    def decrement(self):
+        value = self.redis.decr(self.key)
+        return int(value)
+
     def fetch(self):
         raise NotImplementedError()
 
 
 # noinspection PyAbstractClass
-class VideoVisitCachedFieldBase(NumericalCachedField):
+class VideoVisitCachedField(NumericalCachedField):
     def __init__(self, redis_engine, model_identity):
-        super(VideoVisitCachedFieldBase, self).__init__(redis_engine, 'videos', model_identity)
+        super().__init__(redis_engine, 'videos', model_identity)
