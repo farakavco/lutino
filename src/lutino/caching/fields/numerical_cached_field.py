@@ -1,10 +1,10 @@
-from lutino.caching.fields.cached_field import CachedField
+from lutino.caching.fields.base import CachedField, MemoryCacheMixin
 
 
 class NumericalCachedField(CachedField):
+    __provider__ = MemoryCacheMixin()
 
-    def __init__(self, redis_engine, model_name, model_identity, field_name):
-        self.redis = redis_engine
+    def __init__(self, model_name, model_identity, field_name):
         self.model_name = model_name
         self.model_identity = model_identity
         self.field_name = field_name
@@ -28,7 +28,7 @@ class NumericalCachedField(CachedField):
             if value is None:
                 raise ValueError()
 
-        self.redis.set(self.key, value, ex=ttl)
+        self.__provider__.set_cache(self.key, value)
         return value
 
     def increment(self):

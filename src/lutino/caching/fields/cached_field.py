@@ -1,3 +1,0 @@
-
-class CachedField(object):
-    pass
