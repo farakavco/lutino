@@ -13,7 +13,7 @@ class NumericalCachedField(CachedField):
     def key(self):
         return '%s_%s_%s' % (self.model_name, self.model_identity, self.field_name)
 
-    def get(self, ttl=None, arguments=([], {})):
+    def get(self, ttl=None):
         value = self.redis.get(self.key)
 
         if value is None:
@@ -43,19 +43,13 @@ class NumericalCachedField(CachedField):
         raise NotImplementedError()
 
     @classmethod
-    def cached_field(cls, redis, model_name, ttl=None):
+    def cached_field(cls, redis, model_name, model_identity, ttl=None):
         def decorator(func):
 
             def wrapper(*args, **kwargs):
-                obj = cls(redis, model_name, func())
-                return obj.get(ttl=ttl, arguments=(args, kwargs))
+                obj = cls(redis, model_name, model_identity)
+                return obj.get(ttl=ttl)
 
             return wrapper
 
         return decorator
-
-
-# noinspection PyAbstractClass
-class VideoVisitCachedField(NumericalCachedField):
-    def __init__(self, redis_engine, model_identity):
-        super().__init__(redis_engine, 'videos', model_identity, 'visits')
