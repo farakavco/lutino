@@ -43,13 +43,5 @@ class NumericalCachedField(CachedField):
         raise NotImplementedError()
 
     @classmethod
-    def cached_field(cls, redis, model_name, model_identity, ttl=None):
-        def decorator(func):
-
-            def wrapper(*args, **kwargs):
-                obj = cls(redis, model_name, model_identity)
-                return obj.get(ttl=ttl)
-
-            return wrapper
-
-        return decorator
+    def decorate(cls):
+        raise NotImplementedError()
