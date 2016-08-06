@@ -4,7 +4,7 @@ from lutino.caching.fields.numerical_cached_field import NumericalCachedField
 from lutino.caching.tests.base import RedisTestCase
 
 
-class TestVideoVisitCachedField(RedisTestCase):
+class TestNumericalCachedField(RedisTestCase):
 
     def setUp(self):
         super().setUp()
