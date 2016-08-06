@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-from .exceptions import CacheError, CacheTimeoutError
-from .common import create_cache_key
-from .marchalling import deserialize, serialize
-from .cache_manager import CacheManager
-__author__ = 'vahid'
+from lutino.caching.exceptions import CacheError, CacheTimeoutError
+from lutino.caching.common import create_cache_key
+from lutino.caching.marchalling import deserialize, serialize
+from lutino.caching.cache_manager import CacheManager
