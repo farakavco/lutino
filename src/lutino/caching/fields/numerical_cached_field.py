@@ -1,25 +1,31 @@
-from lutino.caching.fields.base import CachedField, MemoryCacheMixin
+from lutino.caching.fields.base import CachedField, MemoryCacheProvider
 
 
 class NumericalCachedField(CachedField):
-    __provider__ = MemoryCacheMixin()
+    __provider__ = MemoryCacheProvider()
 
-    def __init__(self, model_name, model_identity, field_name):
+    def __init__(self, model_name, model_identity, field_name, fetcher, ttl=None, type_=int):
         self.model_name = model_name
         self.model_identity = model_identity
         self.field_name = field_name
+        self.fetcher = fetcher
+        self.ttl = ttl
+        self.type_ = type_
 
     @property
     def key(self):
         return '%s_%s_%s' % (self.model_name, self.model_identity, self.field_name)
 
-    def get(self, ttl=None):
-        value = self.redis.get(self.key)
+    def value(self):
+        return self.type_(self.get())
+
+    def get(self):
+        value = self.__provider__.get(self.key)
 
         if value is None:
-            return self.set(self.key, ttl)
-        else:
-            return int(value)
+            value = self.__provider__.set(self.key, self.fetch())
+
+        return value
 
     def set(self, value=None, ttl=None):
         if value is None:
@@ -28,19 +34,17 @@ class NumericalCachedField(CachedField):
             if value is None:
                 raise ValueError()
 
-        self.__provider__.set_cache(self.key, value)
+        self.__provider__.set(self.key, value)
         return value
 
     def increment(self):
-        value = self.redis.incr(self.key)
-        return int(value)
+        self.__provider__.increment(self.key)
 
     def decrement(self):
-        value = self.redis.decr(self.key)
-        return int(value)
+        self.__provider__.decrement(self.key)
 
     def fetch(self):
-        raise NotImplementedError()
+        return self.fetcher()
 
     @classmethod
     def decorate(cls):
