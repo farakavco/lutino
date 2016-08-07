@@ -12,6 +12,14 @@ class NumericalCachedField(CachedField):
         self.ttl = ttl
         self.type_ = type_
 
+    def __iadd__(self, other):
+        self.set(self.value() + other)
+        return self
+
+    def __isub__(self, other):
+        self.set(self.value() - other)
+        return self
+
     @property
     def key(self):
         return '%s_%s_%s' % (self.model_name, self.model_identity, self.field_name)
