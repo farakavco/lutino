@@ -14,10 +14,12 @@ class NumericalCachedField(CachedField):
 
     def __iadd__(self, other):
         self.set(self.value() + other)
+        # self.increment()
         return self
 
     def __isub__(self, other):
         self.set(self.value() - other)
+        # self.decrement()
         return self
 
     @property
