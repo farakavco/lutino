@@ -37,7 +37,7 @@ class NumericalCachedField(CachedField):
 
         return value
 
-    def set(self, value=None, ttl=None):
+    def set(self, value=None):
         if value is None:
             value = self.fetch()
 
