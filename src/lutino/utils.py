@@ -65,3 +65,16 @@ def deprecated(func):
     return new_func
 
 
+def natural_sort(l, key=None):
+    """
+    Natural sort a list via specified key.
+    """
+    def convert(text):
+        return int(text) if text.isdigit() else text.lower()
+
+    def alphanum_key(sort_key):
+        nonlocal key
+        sort_key = key(sort_key) if key is not None else sort_key
+        return [convert(c) for c in re.split('([0-9]+)', sort_key)]
+
+    return sorted(l, key=alphanum_key)
