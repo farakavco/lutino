@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 import importlib
 import importlib.util
 import sys
 import warnings
+import re
 from os.path import dirname, abspath
-__author__ = 'vahid'
 
 
 def import_python_module_by_filename(name, module_filename):
@@ -65,7 +64,7 @@ def deprecated(func):
     return new_func
 
 
-def natural_sort(l, key=None):
+def natural_sort(l, key=None, reverse=False):
     """
     Natural sort a list via specified key.
     """
@@ -77,4 +76,4 @@ def natural_sort(l, key=None):
         sort_key = key(sort_key) if key is not None else sort_key
         return [convert(c) for c in re.split('([0-9]+)', sort_key)]
 
-    return sorted(l, key=alphanum_key)
+    return sorted(l, key=alphanum_key, reverse=reverse)
