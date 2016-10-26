@@ -75,6 +75,7 @@ class CacheManager(object):
         try:
             guid = uuid.uuid1()
             item_key = '%s:%s' % (key, guid)
+
             value = value() if callable(value) else value
 
             self.redis.set(
@@ -89,6 +90,69 @@ class CacheManager(object):
         finally:
             if lock:
                 self.unlock(lock)
+
+    def hget_item(self, key, dict_key, recover=None, ttl=None, arguments=([], {}), **kw):
+        item_key = self.redis.get(key)
+
+        value = self.redis.hget(item_key, dict_key) if item_key else None
+
+        # return None if cannot recover the value
+        if value is None and recover is None:
+            return None
+
+        # Trying to recover the value
+        if value is None:
+            return self.hset_item(
+                key,
+                dict_key,
+                lambda: recover(*arguments[0], **arguments[1]),
+                ttl=ttl)
+        else:
+            return deserialize(value)
+
+    def hset_item(self, key, dict_key, value, ttl=None):
+        old_item_key = self.redis.get(key)
+
+        if old_item_key is None:
+            # this is a new item
+            # locking it to prevent concurrency violation
+            lock = self.lock(key, nowait=True)
+            if not lock:
+                # it seems this item is loading in another thread
+                # so, waiting for that:
+                # wait & make sure the object is reloaded, the release the lock
+                self.unlock(self.lock(key))
+                return self.hget_item(key, dict_key)
+
+            # check if item loaded
+            v = self.hget_item(key, dict_key, None)
+            if v:
+                self.unlock(lock)
+                return v
+        else:
+            lock = None
+
+        try:
+            guid = uuid.uuid1()
+            item_key = '%s:%s' % (key, guid)
+
+            value = value() if callable(value) else value
+
+            self.redis.hset(item_key, dict_key, serialize(value))
+            self.redis.expire(item_key, time=ttl)
+            self.redis.set(key, item_key, ex=ttl)
+
+            if old_item_key:
+                self.redis.delete(old_item_key)
+
+            return value
+        finally:
+            if lock:
+                self.unlock(lock)
+
+    def del_item(self, key):
+
+        self.redis.delete(key)
 
     def get_list(self, key, recover=None, ttl=None, arguments=([], {}), key_extractor=None):
         # First, get the keys list
