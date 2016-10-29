@@ -150,12 +150,15 @@ class CacheManager(object):
             if lock:
                 self.unlock(lock)
 
-    def del_item(self, keys):
+    def del_item(self, *keys):
+        item_keys_to_remove = []
         for key in keys:
             item_key = self.redis.get(key)
             if item_key is not None:
-                self.redis.delete(item_key)
-                self.redis.delete(key)
+                item_keys_to_remove.append(item_key)
+
+        self.redis.delete(*item_keys_to_remove)
+        self.redis.delete(*keys)
 
     def get_list(self, key, recover=None, ttl=None, arguments=([], {}), key_extractor=None):
         # First, get the keys list
