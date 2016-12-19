@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-__author__ = 'vahid'
-_character_map = {
+
+_character_map = str.maketrans({
     'ي': 'ی',
     'ك': 'ک',
     'ة': 'ه',
@@ -18,7 +18,6 @@ _character_map = {
     '۸': '8',
     '۹': '9',
 
-
     # Arabic-Indic digits: U+066n: ٠١٢٣٤٥٦٧٨٩
     '٠': '0',
     '١': '1',
@@ -31,22 +30,16 @@ _character_map = {
     '٨': '8',
     '٩': '9',
 
-}
+})
 
 
 def purify(s):
-    res = ''
-    for c in s.strip():
-        if c in _character_map:
-            res += _character_map[c]
-        else:
-            res += c
-    return res
+    return s.translate(_character_map)
 
 
 if __name__ == '__main__':
-    sample_input = 'يكةۀ'
-    expected_output = 'یکهه'
+    sample_input = 'يكةۀ ۱۲۳۴'
+    expected_output = 'یکهه 1234'
 
     assert purify(sample_input) == expected_output
     print('success')
