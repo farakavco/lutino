@@ -36,7 +36,7 @@ _character_map = {
 
 def purify(s):
     res = ''
-    for c in s:
+    for c in s.strip():
         if c in _character_map:
             res += _character_map[c]
         else:
