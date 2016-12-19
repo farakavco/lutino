@@ -34,11 +34,11 @@ _character_map = str.maketrans({
 
 
 def purify(s):
-    return s.translate(_character_map)
+    return s.strip().translate(_character_map)
 
 
 if __name__ == '__main__':
-    sample_input = 'يكةۀ ۱۲۳۴'
+    sample_input = '  يكةۀ ۱۲۳۴'
     expected_output = 'یکهه 1234'
 
     assert purify(sample_input) == expected_output
