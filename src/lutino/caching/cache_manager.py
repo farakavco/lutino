@@ -150,6 +150,10 @@ class CacheManager(object):
             if lock:
                 self.unlock(lock)
 
+    def hdel_item(self, key, dict_key):
+        item_key = self.redis.get(key)
+        self.redis.hdel(item_key, dict_key)
+
     def del_item(self, *keys):
         item_keys_to_remove = []
         for key in keys:
