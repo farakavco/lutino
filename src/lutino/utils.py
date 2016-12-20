@@ -77,3 +77,16 @@ def natural_sort(l, key=None, reverse=False):
         return [convert(c) for c in re.split('([0-9]+)', sort_key)]
 
     return sorted(l, key=alphanum_key, reverse=reverse)
+
+
+def normalize_b64urlsafe(content):
+    padding_check = len(content) % 4
+
+    if padding_check == 1:
+        raise ValueError
+    elif padding_check == 2:
+        content += '=='
+    elif padding_check == 3:
+        content += '='
+
+    return urlsafe_b64decode(content).decode()
