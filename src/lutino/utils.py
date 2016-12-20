@@ -4,6 +4,7 @@ import sys
 import warnings
 import re
 from os.path import dirname, abspath
+from base64 import urlsafe_b64decode
 
 
 def import_python_module_by_filename(name, module_filename):
