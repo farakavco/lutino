@@ -27,6 +27,13 @@ def import_python_module_by_filename(name, module_filename):
     return imported_module
 
 
+def get_class_by_name(name):
+    parts = name.split('.')
+    module_name, class_name = '.'.join(parts[:-1]), parts[-1]
+    module_ = importlib.import_module(module_name)
+    return getattr(module_, class_name)
+
+
 def construct_class_by_name(name, *args, **kwargs):
     """
     Construct a class by module path name using *args and **kwargs
@@ -36,10 +43,7 @@ def construct_class_by_name(name, *args, **kwargs):
     :param name: class name
     :return: The newly imported python module.
     """
-    parts = name.split('.')
-    module_name, class_name = '.'.join(parts[:-1]), parts[-1]
-    module = importlib.import_module(module_name)
-    return getattr(module, class_name)(*args, **kwargs)
+    return get_class_by_name(name)(*args, **kwargs)
 
 
 def deprecated(func):
