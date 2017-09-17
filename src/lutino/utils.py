@@ -2,9 +2,13 @@ import importlib
 import importlib.util
 import sys
 import warnings
-import re
 from os.path import dirname, abspath
 from base64 import urlsafe_b64decode
+
+try:
+    import re2 as re
+except ImportError:
+    import re
 
 
 def import_python_module_by_filename(name, module_filename):
