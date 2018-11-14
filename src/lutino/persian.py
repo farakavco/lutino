@@ -20,6 +20,9 @@ _character_map = str.maketrans({
     'ً': '',
     'ٌ': '',
     '؛': '',
+    '،': '',
+    '«': '',
+    '»': '',
 
     # Eastern Arabic-Indic digits (Persian and Urdu) U+06Fn: ۰۱۲۳۴۵۶۷۸۹
     '۰': '0',
